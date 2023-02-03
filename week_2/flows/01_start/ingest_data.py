@@ -53,9 +53,9 @@ def ingest_data(user, password, host, port, db, table_name, url):
             break
 
 if __name__ == '__main__':
-    user = "kylekawczynski"
-    password = "root"
-    host = "localhost"
+    user = "****"
+    password = "***"
+    host = "****"
     port = "5432"
     db = "ny_taxi"
     table_name = "yellow_taxi_trips"
