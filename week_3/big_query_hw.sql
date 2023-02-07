@@ -1,30 +1,57 @@
-CREATE OR REPLACE EXTERNAL TABLE `taxi-rides-ny.nytaxi.fhv_tripdata`
-OPTIONS (
+create or replace external table `trans-aurora-376318.dezoomcamp.fhv_2019ExternalTable`
+options (
   format = 'CSV',
-  uris = ['gs://nyc-tlc-data/releases/tag/fhv/fhv_tripdata_2019-*.csv']
+  uris = ['gs://dtc_data_lake_trans-aurora-376318/data/FHV_2019*']
 );
 
 
-SELECT count(*) FROM `taxi-rides-ny.nytaxi.fhv_tripdata`;
+--question 1, results = ~43,244,696 rows
+select count(*)
+from `trans-aurora-376318.dezoomcamp.fhv_2019table`;
 
+--question 2
+CREATE OR REPLACE TABLE trans-aurora-376318.dezoomcamp.fhv_2019non_partioned_table AS
+SELECT * FROM trans-aurora-376318.dezoomcamp.fhv_2019ExternalTable;
 
-SELECT COUNT(DISTINCT(dispatching_base_num)) FROM `taxi-rides-ny.nytaxi.fhv_tripdata`;
+-- Create a partitioned table from external table
+CREATE OR REPLACE TABLE trans-aurora-376318.dezoomcamp.fhv_2019partioned_table
+PARTITION BY
+  DATE(pickup_datetime) AS
+SELECT * FROM trans-aurora-376318.dezoomcamp.fhv_2019ExternalTable;
 
+-- Impact of partition
+-- Scanning 318 MB of data
+SELECT DISTINCT(Affiliated_base_number)
+FROM trans-aurora-376318.dezoomcamp.fhv_2019non_partioned_table;
 
-CREATE OR REPLACE TABLE `taxi-rides-ny.nytaxi.fhv_nonpartitioned_tripdata`
-AS SELECT * FROM `taxi-rides-ny.nytaxi.fhv_tripdata`;
+-- Impact of partition
+-- Scanning 318 MB of data
+SELECT DISTINCT(Affiliated_base_number)
+FROM trans-aurora-376318.dezoomcamp.fhv_2019partioned_table;
 
-CREATE OR REPLACE TABLE `taxi-rides-ny.nytaxi.fhv_partitioned_tripdata`
-PARTITION BY DATE(dropoff_datetime)
-CLUSTER BY dispatching_base_num AS (
-  SELECT * FROM `taxi-rides-ny.nytaxi.fhv_tripdata`
-);
+SELECT DISTINCT(Affiliated_base_number)
+FROM trans-aurora-376318.dezoomcamp.fhv_2019ExternalTable;
 
-SELECT count(*) FROM  `taxi-rides-ny.nytaxi.fhv_nonpartitioned_tripdata`
-WHERE dropoff_datetime BETWEEN '2019-01-01' AND '2019-03-31'
-  AND dispatching_base_num IN ('B00987', 'B02279', 'B02060');
+--question 3 results = 717,748 rows
+select count(*)
+from trans-aurora-376318.dezoomcamp.fhv_2019ExternalTable
+where PUlocationID is null and DOlocationID is null;
 
+--question 5 Write a query to retrieve the distinct affiliated_base_number between pickup_datetime 
+--03/01/2019 and 03/31/2019 (inclusive)
+CREATE OR REPLACE TABLE trans-aurora-376318.dezoomcamp.fhv_2019partioned_table
+PARTITION BY
+  DATE(pickup_datetime) 
+  CLUSTER BY Affiliated_base_number
+  AS
+SELECT * FROM trans-aurora-376318.dezoomcamp.fhv_2019ExternalTable;
 
-SELECT count(*) FROM `taxi-rides-ny.nytaxi.fhv_partitioned_tripdata`
-WHERE dropoff_datetime BETWEEN '2019-01-01' AND '2019-03-31'
-  AND dispatching_base_num IN ('B00987', 'B02279', 'B02060');
+-- 23.05 MB
+SELECT distinct affiliated_base_number
+FROM trans-aurora-376318.dezoomcamp.fhv_2019partioned_table
+WHERE DATE(pickup_datetime) BETWEEN '2019-03-01' AND '2019-03-31';
+
+-- 647.87 MB
+SELECT distinct affiliated_base_number
+FROM trans-aurora-376318.dezoomcamp.fhv_2019non_partioned_table
+WHERE DATE(pickup_datetime) BETWEEN '2019-03-01' AND '2019-03-31';
