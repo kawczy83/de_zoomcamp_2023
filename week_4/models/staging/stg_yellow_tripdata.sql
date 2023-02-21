@@ -3,9 +3,9 @@
 with tripdata as 
 (
   select *,
-    row_number() over(partition by vendorid, tpep_pickup_datetime 
-        order by  pulocationid,tpep_pickup_datetime, tpep_dropoff_datetime )) as rn
-  from {{ source('staging','rides') }}
+    row_number() over(partition by cast(vendorid as integer), cast(tpep_pickup_datetime as timestamp)
+        order by  pulocationid,tpep_pickup_datetime, tpep_dropoff_datetime ) as rn
+  from {{ source('staging','yellow_taxi_trip') }}
   where vendorid is not null 
 )
 select

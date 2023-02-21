@@ -6,8 +6,9 @@ sources:
     schema: dezoomcamp
 
     tables:
-      - name: green_taxi_rides
-      - name: rides
+      - name: green_taxi_trips
+      - name: yellow_taxi_trip
+      - name: fhv_2019non_partioned_table
 
 models:
     - name: stg_green_tripdata

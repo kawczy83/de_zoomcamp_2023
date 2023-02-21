@@ -1,11 +1,11 @@
 {{ config(materialized='view') }}
+
 with tripdata as 
 (
   select *,
-    row_number() over(partition by  vendorid, lpep_pickup_datetime 
-     order by  pulocationid,lpep_pickup_datetime, lpep_dropoff_datetime 
-    ) as rn
-  from {{ source('staging','green_taxi_rides') }}
+    row_number() over(partition by cast(vendorid as integer), cast(lpep_pickup_datetime as timestamp)
+     order by  pulocationid,lpep_pickup_datetime, lpep_dropoff_datetime) as rn
+  from {{ source('staging','green_taxi_trips') }}
   where vendorid is not null 
 )
 select 
