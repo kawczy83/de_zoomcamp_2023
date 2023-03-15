@@ -1,0 +1,12 @@
+default:
+  target: bigquery
+  outputs:
+    bigquery:
+      type: bigquery
+      method: oauth
+      #keyfile: abc10b6f12e0afb7e2a4231c64521c990673a803
+      project: trans-aurora-376318
+      dataset: dezoomcamp
+      timeout_seconds: 300
+      location: US
+      priority: interactive
