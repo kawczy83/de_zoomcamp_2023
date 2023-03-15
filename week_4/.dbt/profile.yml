@@ -4,5 +4,5 @@ default:
     dev:
       type: bigquery
       method: oauth
-      project: trans-aurora-376318
-      dataset: dezoomcamp
+      project: [INSERT PROJECT ID]
+      dataset: [INSERT SCHEMA]
